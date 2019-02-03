@@ -9,40 +9,24 @@
  */
 package org.openmrs.module.tebowcurescheduler.api;
 
-import org.openmrs.annotation.Authorized;
-import org.openmrs.api.APIException;
+import java.util.List;
+
+import org.openmrs.Encounter;
+import org.openmrs.Obs;
 import org.openmrs.api.OpenmrsService;
-import org.openmrs.module.tebowcurescheduler.TebowCURESchedulerConfig;
-import org.openmrs.module.tebowcurescheduler.Item;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The main service of this module, which is exposed for other modules. See
  * moduleApplicationContext.xml on how it is wired up.
  */
+@Service("tebowCURESchedulerService")
 public interface TebowCURESchedulerService extends OpenmrsService {
 	
-	/**
-	 * Returns an item by uuid. It can be called by any authenticated user. It is fetched in read
-	 * only transaction.
-	 * 
-	 * @param uuid
-	 * @return
-	 * @throws APIException
-	 */
-	@Authorized()
-	@Transactional(readOnly = true)
-	Item getItemByUuid(String uuid) throws APIException;
-	
-	/**
-	 * Saves an item. Sets the owner to superuser, if it is not set. It can be called by users with
-	 * this module's privilege. It is executed in a transaction.
-	 * 
-	 * @param item
-	 * @return
-	 * @throws APIException
-	 */
-	@Authorized(TebowCURESchedulerConfig.MODULE_PRIVILEGE)
 	@Transactional
-	Item saveItem(Item item) throws APIException;
+	Encounter createAdmissionRequestEncounter(Obs trigger);
+	
+	@Transactional
+	List<Obs> getRecentClinicalCoverObs(int repeatInterval);
 }

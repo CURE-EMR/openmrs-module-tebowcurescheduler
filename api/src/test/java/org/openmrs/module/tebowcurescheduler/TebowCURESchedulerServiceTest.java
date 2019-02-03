@@ -45,7 +45,7 @@ public class TebowCURESchedulerServiceTest {
 	
 	@Test
 	public void saveItem_shouldSetOwnerIfNotSet() {
-		//Given
+		// Given
 		Item item = new Item();
 		item.setDescription("some description");
 		
@@ -54,10 +54,10 @@ public class TebowCURESchedulerServiceTest {
 		User user = new User();
 		when(userService.getUser(1)).thenReturn(user);
 		
-		//When
+		// When
 		basicModuleService.saveItem(item);
 		
-		//Then
+		// Then
 		assertThat(item, hasProperty("owner", is(user)));
 	}
 }

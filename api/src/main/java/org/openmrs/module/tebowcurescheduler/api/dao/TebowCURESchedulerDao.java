@@ -9,29 +9,39 @@
  */
 package org.openmrs.module.tebowcurescheduler.api.dao;
 
-import org.hibernate.criterion.Restrictions;
-import org.openmrs.api.db.hibernate.DbSession;
-import org.openmrs.api.db.hibernate.DbSessionFactory;
-import org.openmrs.module.tebowcurescheduler.Item;
+import java.lang.reflect.Method;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository("tebowcurescheduler.TebowCURESchedulerDao")
 public class TebowCURESchedulerDao {
 	
+	/* Logger for this class and subclasses */
+	protected final Log log = LogFactory.getLog(getClass());
+	
 	@Autowired
-	DbSessionFactory sessionFactory;
+	private SessionFactory sessionFactory;
 	
-	private DbSession getSession() {
-		return sessionFactory.getCurrentSession();
+	public void setSessionFactory(SessionFactory sf) {
+		this.sessionFactory = sf;
 	}
 	
-	public Item getItemByUuid(String uuid) {
-		return (Item) getSession().createCriteria(Item.class).add(Restrictions.eq("uuid", uuid)).uniqueResult();
-	}
-	
-	public Item saveItem(Item item) {
-		getSession().saveOrUpdate(item);
-		return item;
+	private org.hibernate.Session getCurrentSession() {
+		try {
+			return sessionFactory.getCurrentSession();
+		}
+		catch (NoSuchMethodError ex) {
+			try {
+				Method method = sessionFactory.getClass().getMethod("getCurrentSession", null);
+				return (org.hibernate.Session) method.invoke(sessionFactory, null);
+			}
+			catch (Exception e) {
+				throw new RuntimeException("Failed to get the current hibernate session", e);
+			}
+		}
 	}
 }

@@ -9,10 +9,13 @@
  */
 package org.openmrs.module.tebowcurescheduler.api;
 
+import java.util.Date;
 import java.util.List;
 
+import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
+import org.openmrs.Person;
 import org.openmrs.api.OpenmrsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,5 +31,8 @@ public interface TebowCURESchedulerService extends OpenmrsService {
 	Encounter createAdmissionRequestEncounter(Obs trigger);
 	
 	@Transactional
-	List<Obs> getRecentClinicalCoverObs(int repeatInterval);
+	List<Obs> getRecentClinicalCoverObs(int repeatInterval, Concept concept);
+	
+	@Transactional
+	List<Obs> getObservations(Person person, Concept concept, Date dateCreated);
 }

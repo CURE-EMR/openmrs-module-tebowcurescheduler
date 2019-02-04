@@ -9,11 +9,10 @@
  */
 package org.openmrs.module.tebowcurescheduler.api.impl;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.openmrs.Concept;
 import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Person;
@@ -90,19 +89,12 @@ public class TebowCURESchedulerServiceImpl extends BaseOpenmrsService implements
 	}
 	
 	@Override
-	public List<Obs> getRecentClinicalCoverObs(int repeatInterval) {
-		List<Obs> newObs = new ArrayList<Obs>();
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.MINUTE, -repeatInterval);
-		Date minutesBack = cal.getTime();
-		
-		List<Obs> recentClinicalCoverObs = Context.getObsService().getObservationsByPersonAndConcept(null, Context.getConceptService().getConcept(3820));
-		for (Obs obs : recentClinicalCoverObs) {
-			if (obs.getDateCreated().after(minutesBack)) {
-				newObs.add(obs);
-			}
-		}
-		
-		return newObs;
+	public List<Obs> getRecentClinicalCoverObs(int repeatInterval, Concept concept) {
+		return dao.getRecentClinicalCoverObs(repeatInterval, concept);
+	}
+	
+	@Override
+	public List<Obs> getObservations(Person person, Concept concept, Date dateCreated) {
+		return dao.getObservations(person, concept, dateCreated);
 	}
 }

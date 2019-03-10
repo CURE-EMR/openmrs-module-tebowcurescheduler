@@ -23,6 +23,7 @@ import org.hibernate.SessionFactory;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
 import org.openmrs.Person;
+import org.openmrs.Visit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -76,16 +77,24 @@ public class TebowCURESchedulerDao {
 		return obsList;
 	}
 	
-	public List<Obs> getObservations(Person person, Concept concept, Date dateCreated) {
+	@SuppressWarnings("unchecked")
+	public List<Visit> getToAdmitVisitsList() {
 		
-		SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
-		String dateSting = f.format(dateCreated);
-		
-		String sql = "SELECT * FROM obs WHERE person_id = " + person.getPersonId() + " AND value_coded = " + concept.getConceptId() + " AND date_created >= \'" + dateSting + "\';";
+		String sql = "select * from visit v join encounter e on v.visit_id = e.visit_id join obs o on e.encounter_id = o.encounter_id and o.voided = 0 join concept c on o.value_coded = c.concept_id join concept_name cn on c.concept_id = cn.concept_id where v.date_stopped is null and cn.name = 'Admit Patient' and v.visit_id not in ( select visit_id from encounter ie join encounter_type iet on iet.encounter_type_id = ie.encounter_type where iet.name = 'ADMISSION' );";
 		SQLQuery query = getCurrentSession().createSQLQuery(sql);
-		query.addEntity(Obs.class);
-		List<Obs> obsList = query.list();
-		return obsList;
+		query.addEntity(Visit.class);
+		List<Visit> visitsList = query.list();
+		return visitsList;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Visit> getAdmittedVisitsList() {
+		
+		String sql = "select * from visit v join visit_attribute va on v.visit_id = va.visit_id and va.value_reference = \"Admitted\" and va.voided = 0 join visit_attribute_type vat on vat.visit_attribute_type_id = va.attribute_type_id and vat.name = \"Admission Status\" where v.date_stopped is null AND v.voided = 0;";
+		SQLQuery query = getCurrentSession().createSQLQuery(sql);
+		query.addEntity(Visit.class);
+		List<Visit> visitsList = query.list();
+		return visitsList;
 	}
 	
 }

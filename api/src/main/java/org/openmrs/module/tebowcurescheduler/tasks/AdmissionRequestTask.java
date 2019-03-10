@@ -9,12 +9,11 @@
  */
 package org.openmrs.module.tebowcurescheduler.tasks;
 
-import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
+import org.openmrs.Visit;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.tebowcurescheduler.api.TebowCURESchedulerService;
@@ -41,16 +40,16 @@ public class AdmissionRequestTask extends AbstractTask {
 			TaskDefinition admissionRequestTask = Context.getSchedulerService().getTaskByName("Admission Request Task");
 			Long repeatInterval = admissionRequestTask.getRepeatInterval();
 			Concept clinicalCoverFormConcept = cs.getConceptByUuid("78052c25-5984-4f5d-87f6-78e9e55963ba");
-			Concept admitPatientDispositionConcept = cs.getConceptByUuid("81cded5a-3f10-11e4-adec-0800271c1b75");
+			List<Visit> toAdmit = tcs.getToAdmitVisitsList();
+			List<Visit> admitted = tcs.getAdmittedVisitsList();
 			
 			if (repeatInterval != null) {
-				
 				List<Obs> recentClinicalCoverObs = Context.getService(TebowCURESchedulerService.class).getRecentClinicalCoverObs(repeatInterval.intValue(), clinicalCoverFormConcept);
 				
 				if (recentClinicalCoverObs != null && recentClinicalCoverObs.size() > 0) {
 					for (Obs obs : recentClinicalCoverObs) {
-						List<Obs> existingAdmissionRequestsForPerson = tcs.getObservations(obs.getPerson(), admitPatientDispositionConcept, new Date());
-						if (CollectionUtils.isEmpty(existingAdmissionRequestsForPerson)) {
+						
+						if (!isInToAdmitList(obs, toAdmit) && !isInAdmittedList(obs, admitted)) {
 							tcs.createAdmissionRequestEncounter(obs);
 						}
 					}
@@ -61,6 +60,24 @@ public class AdmissionRequestTask extends AbstractTask {
 		catch (Exception e) {
 			log.error("Failed to create admission request", e);
 		}
+	}
+	
+	public boolean isInToAdmitList(Obs o, List<Visit> visit) {
+		for (Visit v : visit) {
+			if (v.getPatient().getPatientId() == o.getPersonId()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isInAdmittedList(Obs o, List<Visit> visit) {
+		for (Visit v : visit) {
+			if (v.getPatient().getPatientId() == o.getPersonId()) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 }

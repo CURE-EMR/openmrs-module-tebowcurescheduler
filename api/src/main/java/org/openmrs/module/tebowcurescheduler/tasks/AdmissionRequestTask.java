@@ -64,7 +64,7 @@ public class AdmissionRequestTask extends AbstractTask {
 	
 	public boolean isInToAdmitList(Obs o, List<Visit> visit) {
 		for (Visit v : visit) {
-			if (v.getPatient().getPatientId() == o.getPersonId()) {
+			if (v.getPatient().getPatientId().intValue() == o.getPersonId().intValue()) {
 				return true;
 			}
 		}
@@ -73,7 +73,7 @@ public class AdmissionRequestTask extends AbstractTask {
 	
 	public boolean isInAdmittedList(Obs o, List<Visit> visit) {
 		for (Visit v : visit) {
-			if (v.getPatient().getPatientId() == o.getPersonId()) {
+			if (v.getPatient().getPatientId().intValue() == o.getPersonId().intValue()) {
 				return true;
 			}
 		}
